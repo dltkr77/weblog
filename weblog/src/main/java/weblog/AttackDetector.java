@@ -38,7 +38,7 @@ public class AttackDetector extends Configured implements Tool {
 		job.setReducerClass(AttackDetectorReducer.class);
 		
 		job.setMapOutputKeyClass(Text.class);
-		job.setMapOutputValueClass(Text.class);
+		job.setMapOutputValueClass(IntWritable.class);
 		
 		job.setOutputKeyClass(Text.class);
 		job.setOutputValueClass(IntWritable.class);
@@ -50,18 +50,18 @@ public class AttackDetector extends Configured implements Tool {
 		return success ? 0 : 1;
 	}
 	
-	public static class AttackDetectorMapper extends Mapper<LongWritable, Text, Text, Text> {
+	public static class AttackDetectorMapper extends Mapper<LongWritable, Text, Text, IntWritable> {
 		private final static String regex = 
 				"(\\w+=\\w+)(\\;|%20|\'|\"|\\s+|[0-9]+)(and|or|exec|and|or|create|select)";
 		private Pattern p = Pattern.compile(regex);
 		/*
          * () == key
 		 * Input : (offset), IP, Date, Time, URL, Parameter, Status
-		 * Output : (IP, Date, Time), URL, Parameter, Status, 1[]
+		 * Output : (IP, Date, Time, URL), 1[]
 		 */
 		@Override
 		protected void map(LongWritable key, Text value,
-				Mapper<LongWritable, Text, Text, Text>.Context context)
+				Mapper<LongWritable, Text, Text, IntWritable>.Context context)
 				throws IOException, InterruptedException {
 			String words[] = value.toString().split("\\s+");
 			String ip = words[0];
@@ -69,28 +69,27 @@ public class AttackDetector extends Configured implements Tool {
 			String time = words[2];
 			String url = words[3];
 			String param = words[4];
-			String stat = words[5];
 			
 			Matcher m = p.matcher(param);
 			if(m.find() || param.contains("xp_cmdshell")) {
-				context.write(new Text(ip + " " + date + " " + time), new Text(url + " " + param + " " + stat)); // 1 skip
+				context.write(new Text(ip + " " + date + " " + time + " " + url), new IntWritable(1));
 			}
 		}
 	}
 	
-	public static class AttackDetectorReducer extends Reducer<Text, Text, Text, IntWritable> {
+	public static class AttackDetectorReducer extends Reducer<Text, IntWritable, Text, IntWritable> {
 		/*
          * () == key
-		 * Input : (IP, Date, Time), URL, Parameter, Status, 1[] -- 1 skip
-		 * Output : (IP, Date, Time), Probability
+		 * Input : (IP, Date, Time, URL), Parameter, Status, 1[] -- 1 skip
+		 * Output : (IP, Date, Time, URL), Probability
 		 */
 		@Override
-		protected void reduce(Text key, Iterable<Text> values,
-				Reducer<Text, Text, Text, IntWritable>.Context context)
+		protected void reduce(Text key, Iterable<IntWritable> values,
+				Reducer<Text, IntWritable, Text, IntWritable>.Context context)
 				throws IOException, InterruptedException {
 								
 			int prob = 0;
-			for(Text value : values) {
+			for(IntWritable value : values) {
 				prob++;
 			}
 			context.write(key, new IntWritable(prob));

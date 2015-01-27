@@ -16,29 +16,29 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 
-public class TimebaseCounter extends Configured implements Tool {
+public class StateDetector extends Configured implements Tool {
 	public static void main(String[] args) throws Exception {
 		if(args.length != 2) {
-			System.out.println("Usage: TimebaseDetector <input dir> <output dir>");
+			System.out.println("Usage: StateDetector <input dir> <output dir>");
 			System.exit(-1);
 		}
-		int result = ToolRunner.run(new Configuration(), new TimebaseCounter(), args);
+		int result = ToolRunner.run(new Configuration(),  new StateDetector(), args);
 		System.exit(result);
 	}
 
 	public int run(String[] args) throws Exception {
 		Configuration conf = getConf();
-		Job job = new Job(conf, "Timebase Detector");
+		Job job = new Job(conf, "State Detector");
 		
-		job.setJarByClass(TimebaseCounter.class);
-		job.setMapperClass(TimebaseMapper.class);
-		job.setReducerClass(TimebaseReducer.class);
+		job.setJarByClass(StateDetector.class);
+		job.setMapperClass(StateDetectorMapper.class);
+		job.setReducerClass(StateDetectorReducer.class);
 		
 		job.setMapOutputKeyClass(Text.class);
-		job.setMapOutputValueClass(IntWritable.class);
+		job.setMapOutputValueClass(Text.class);
 		
 		job.setOutputKeyClass(Text.class);
-		job.setOutputValueClass(IntWritable.class);
+		job.setOutputValueClass(Text.class);
 		
 		FileInputFormat.addInputPath(job, new Path(args[0]));
 		FileOutputFormat.setOutputPath(job, new Path(args[1]));
@@ -47,42 +47,51 @@ public class TimebaseCounter extends Configured implements Tool {
 		return success ? 0 : 1;
 	}
 	
-	public static class TimebaseMapper extends Mapper<LongWritable, Text, Text, IntWritable> {
+	public static class StateDetectorMapper extends Mapper<LongWritable, Text, Text, Text> {
 		/*
          * () == key
 		 * Input : (offset), IP, Date, Time, URL, Parameter, Status
-		 * Output : (IP, Date, Time, URL), 1
+		 * Output : (IP, URL), Status
 		 */
 		@Override
 		protected void map(LongWritable key, Text value,
-				Mapper<LongWritable, Text, Text, IntWritable>.Context context)
+				Mapper<LongWritable, Text, Text, Text>.Context context)
 				throws IOException, InterruptedException {
-			String[] words = value.toString().split("\\s+");
+			String words[] = value.toString().split("\\s+");
 			String ip = words[0];
-			String date = words[1];
-			String time = words[2];
 			String url = words[3];
+			String stat = words[5];
 			
-			context.write(new Text(ip + " " + date + " " + time + " " + url), new IntWritable(1));
+			context.write(new Text(ip + " " + url), new Text(stat));
 		}
 	}
 	
-	public static class TimebaseReducer extends Reducer<Text, IntWritable, Text, IntWritable> {
+	public static class StateDetectorReducer extends Reducer<Text, Text, Text, IntWritable> {
 		/*
          * () == key
-		 * Input : (IP, Date, Time, URL), 1[]
-		 * Output : (IP, Date, Time, URL), count
+		 * Input : (IP, URL), Status
+		 * Output : (IP, URL), if sFlag&&eFlag == count 
 		 */
 		@Override
-		protected void reduce(Text key, Iterable<IntWritable> values,
-				Reducer<Text, IntWritable, Text, IntWritable>.Context context)
+		protected void reduce(Text key, Iterable<Text> values,
+				Reducer<Text, Text, Text, IntWritable>.Context context)
 				throws IOException, InterruptedException {
+			boolean sFlag = false;
+			boolean eFlag = false;
+			int count = 0; 
 			
-			int count = 0;
-			for(IntWritable value : values) {
-				count++;
+			for(Text value : values) {
+				String test = value.toString();
+				if(test.equals("500")) {
+					sFlag = true;
+					count++;
+				}
+				else if(sFlag && test.equals("200")) eFlag = true; 
 			}
-			context.write(key, new IntWritable(count));
+			
+			if(eFlag && sFlag) {
+				context.write(key, new IntWritable(count));
+			}
 		}
 	}
 }
