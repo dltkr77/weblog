@@ -50,49 +50,47 @@ public class AttackDetector extends Configured implements Tool {
 		return success ? 0 : 1;
 	}
 	
-	public static class AttackDetectorMapper extends Mapper<LongWritable, Text, Text, IntWritable> {
+	public static class AttackDetectorMapper extends Mapper<LongWritable, Text, Text, Text> {
 		private final static String regex = 
 				"(\\w+=\\w+)(\\;|%20|\'|\"|\\s+|[0-9]+)(and|or|exec|and|or|create|select)";
 		private Pattern p = Pattern.compile(regex);
 		/*
          * () == key
 		 * Input : (offset), IP@Time, URL, Parameter, Status
-		 * Output : (IP@Time, URL, Parameter, Status), Probability
+		 * Output : (IP@Time), URL, Parameter, Status, 1[]
 		 */
 		@Override
 		protected void map(LongWritable key, Text value,
-				Mapper<LongWritable, Text, Text, IntWritable>.Context context)
+				Mapper<LongWritable, Text, Text, Text>.Context context)
 				throws IOException, InterruptedException {
 			String words[] = value.toString().split("\\s+");
 			String ipTime = words[0];
 			String url = words[1];
 			String param = words[2];
 			String stat = words[3];
-			int prob = 0;
 			
 			Matcher m = p.matcher(param);
 			if(m.find() || param.contains("xp_cmdshell")) {
-				prob = 1;
+				context.write(new Text(ipTime), new Text(url + " " + param + " " + stat)); // 1 skip
 			}
-			context.write(new Text(ipTime + " " + url + " " + param + " " + stat), new IntWritable(prob));
 		}
 	}
 	
-	public static class AttackDetectorReducer extends Reducer<Text, IntWritable, Text, IntWritable> {
+	public static class AttackDetectorReducer extends Reducer<Text, Text, Text, IntWritable> {
 		/*
          * () == key
-		 * Input : (IP@Time, URL, Parameter, Status), Probability[] (0 | 1)
-		 * Output : (IP@Time, URL, Parameter, Status), total Probability
+		 * Input : (IP@Time), URL, Parameter, Status, 1[] -- 1 skip
+		 * Output : (IP@Time@URL), total Probability
 		 */
 		@Override
-		protected void reduce(Text key, Iterable<IntWritable> values,
-				Reducer<Text, IntWritable, Text, IntWritable>.Context context)
+		protected void reduce(Text key, Iterable<Text> values,
+				Reducer<Text, Text, Text, IntWritable>.Context context)
 				throws IOException, InterruptedException {
 			int prob = 0;
-			for(IntWritable value : values) {
-				prob += value.get();
+			for(Text value : values) {
+				prob++;
 			}
-			context.write(key, new IntWritable(prob));
+			context.write(new Text(key + " " + key.toString().split("\\s+")[1]), new IntWritable(prob));
 		}
 	}
 }
