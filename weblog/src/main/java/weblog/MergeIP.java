@@ -58,7 +58,12 @@ public class MergeIP extends Configured implements Tool {
                 Mapper<LongWritable, Text, Text, Text>.Context context)
                 throws IOException, InterruptedException {
             String words[] = value.toString().split("\\s+");
-            String ip = words[9];
+            String ip = null;
+            try {
+            	ip = words[9];
+            } catch(ArrayIndexOutOfBoundsException e) {
+            	System.out.println(value.toString());
+            }
             String time = words[1];
             String url = words[5].toLowerCase();
             String param = words[6].toLowerCase();
