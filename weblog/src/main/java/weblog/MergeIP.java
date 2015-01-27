@@ -51,7 +51,7 @@ public class MergeIP extends Configured implements Tool {
 		/*
          * () == key
          * Input : (offset), line
-         * Output: (IP, Time), URL, Parameter, Status
+         * Output: (IP, Date, Time), URL, Parameter, Status
          */
         @Override
         protected void map(LongWritable key, Text value,
@@ -64,21 +64,22 @@ public class MergeIP extends Configured implements Tool {
             } catch(ArrayIndexOutOfBoundsException e) {
             	System.out.println(value.toString());
             }
+            String date = words[0];
             String time = words[1];
             String url = words[5].toLowerCase();
             String param = words[6].toLowerCase();
             String status = words[11];
 			Text output = new Text(url + " " + param + " " + status);
 
-            context.write(new Text(ip + " " + time), output);
+            context.write(new Text(ip + " " + date + " " + time), output);
 		}
 	}
 	
 	public static class MergeReducer extends Reducer<Text, Text, Text, Text> {
 		/*
          * () == key
-		 * Input : (IP, Time), [URL, Parameter, Status]
-		 * Output : (IP, Time), URL, Parameter, Status
+		 * Input : (IP, Date, Time), [URL, Parameter, Status]
+		 * Output : (IP, Date, Time), URL, Parameter, Status
 		 */
 		@Override
 		protected void reduce(Text key, Iterable<Text> values,
@@ -87,7 +88,7 @@ public class MergeIP extends Configured implements Tool {
 			
 			for(Text value : values) {
 				context.write(key, value);
-			}			
+			}
 		}
 	}
 }

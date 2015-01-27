@@ -56,8 +56,8 @@ public class AttackDetector extends Configured implements Tool {
 		private Pattern p = Pattern.compile(regex);
 		/*
          * () == key
-		 * Input : (offset), IP, Time, URL, Parameter, Status
-		 * Output : (IP, Time), URL, Parameter, Status, 1[]
+		 * Input : (offset), IP, Date, Time, URL, Parameter, Status
+		 * Output : (IP, Date, Time), URL, Parameter, Status, 1[]
 		 */
 		@Override
 		protected void map(LongWritable key, Text value,
@@ -65,14 +65,15 @@ public class AttackDetector extends Configured implements Tool {
 				throws IOException, InterruptedException {
 			String words[] = value.toString().split("\\s+");
 			String ip = words[0];
-			String time = words[1];
-			String url = words[2];
-			String param = words[3];
-			String stat = words[4];
+			String date = words[1];
+			String time = words[2];
+			String url = words[3];
+			String param = words[4];
+			String stat = words[5];
 			
 			Matcher m = p.matcher(param);
 			if(m.find() || param.contains("xp_cmdshell")) {
-				context.write(new Text(ip + " " + time), new Text(url + " " + param + " " + stat)); // 1 skip
+				context.write(new Text(ip + " " + date + " " + time), new Text(url + " " + param + " " + stat)); // 1 skip
 			}
 		}
 	}
@@ -80,8 +81,8 @@ public class AttackDetector extends Configured implements Tool {
 	public static class AttackDetectorReducer extends Reducer<Text, Text, Text, IntWritable> {
 		/*
          * () == key
-		 * Input : (IP, Time), URL, Parameter, Status, 1[] -- 1 skip
-		 * Output : (IP, Time), Probability
+		 * Input : (IP, Date, Time), URL, Parameter, Status, 1[] -- 1 skip
+		 * Output : (IP, Date, Time), Probability
 		 */
 		@Override
 		protected void reduce(Text key, Iterable<Text> values,
