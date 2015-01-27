@@ -40,10 +40,10 @@ public class AttackDetector extends Configured implements Tool {
 		job.setReducerClass(AttackDetectorReducer.class);
 		
 		job.setMapOutputKeyClass(Text.class);
-		job.setMapOutputValueClass(IntWritable.class);
+		job.setMapOutputValueClass(Text.class);
 		
 		job.setOutputKeyClass(Text.class);
-		job.setOutputValueClass(Text.class);
+		job.setOutputValueClass(IntWritable.class);
 		
 		FileInputFormat.addInputPath(job, new Path(args[0]));
 		FileOutputFormat.setOutputPath(job, new Path(args[1]));
@@ -80,11 +80,10 @@ public class AttackDetector extends Configured implements Tool {
 	}
 	
 	public static class AttackDetectorReducer extends Reducer<Text, Text, Text, IntWritable> {
-		private Map<Text, Text> map = new HashMap<Text, Text>();
 		/*
          * () == key
 		 * Input : (IP, Time), URL, Parameter, Status, 1[] -- 1 skip
-		 * Output : (IP, Time), URL, Parameter, Status, Probability
+		 * Output : (IP, Time), Probability
 		 */
 		@Override
 		protected void reduce(Text key, Iterable<Text> values,
