@@ -51,7 +51,7 @@ public class MergeIP extends Configured implements Tool {
 		/*
          * () == key
          * Input : (offset), line
-         * Output: (IP@Time), URL, Parameter, Status
+         * Output: (IP, Time), URL, Parameter, Status
          */
         @Override
         protected void map(LongWritable key, Text value,
@@ -65,15 +65,15 @@ public class MergeIP extends Configured implements Tool {
             String status = words[11];
 			Text output = new Text(url + " " + param + " " + status);
 
-            context.write(new Text(ip + "@" + time), output);
+            context.write(new Text(ip + " " + time), output);
 		}
 	}
 	
 	public static class MergeReducer extends Reducer<Text, Text, Text, Text> {
 		/*
          * () == key
-		 * Input : (IP@Time), [URL, Parameter, Status]
-		 * Output : (IP@Time), URL, Parameter, Status
+		 * Input : (IP, Time), [URL, Parameter, Status]
+		 * Output : (IP, Time), URL, Parameter, Status
 		 */
 		@Override
 		protected void reduce(Text key, Iterable<Text> values,

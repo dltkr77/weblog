@@ -1,6 +1,8 @@
 package weblog;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -56,41 +58,44 @@ public class AttackDetector extends Configured implements Tool {
 		private Pattern p = Pattern.compile(regex);
 		/*
          * () == key
-		 * Input : (offset), IP@Time, URL, Parameter, Status
-		 * Output : (IP@Time), URL, Parameter, Status, 1[]
+		 * Input : (offset), IP, Time, URL, Parameter, Status
+		 * Output : (IP, Time), URL, Parameter, Status, 1[]
 		 */
 		@Override
 		protected void map(LongWritable key, Text value,
 				Mapper<LongWritable, Text, Text, Text>.Context context)
 				throws IOException, InterruptedException {
 			String words[] = value.toString().split("\\s+");
-			String ipTime = words[0];
-			String url = words[1];
-			String param = words[2];
-			String stat = words[3];
+			String ip = words[0];
+			String time = words[1];
+			String url = words[2];
+			String param = words[3];
+			String stat = words[4];
 			
 			Matcher m = p.matcher(param);
 			if(m.find() || param.contains("xp_cmdshell")) {
-				context.write(new Text(ipTime), new Text(url + " " + param + " " + stat)); // 1 skip
+				context.write(new Text(ip + " " + time), new Text(url + " " + param + " " + stat)); // 1 skip
 			}
 		}
 	}
 	
 	public static class AttackDetectorReducer extends Reducer<Text, Text, Text, IntWritable> {
+		private Map<Text, Text> map = new HashMap<Text, Text>();
 		/*
          * () == key
-		 * Input : (IP@Time), URL, Parameter, Status, 1[] -- 1 skip
-		 * Output : (IP@Time@URL), total Probability
+		 * Input : (IP, Time), URL, Parameter, Status, 1[] -- 1 skip
+		 * Output : (IP, Time), URL, Parameter, Status, Probability
 		 */
 		@Override
 		protected void reduce(Text key, Iterable<Text> values,
 				Reducer<Text, Text, Text, IntWritable>.Context context)
 				throws IOException, InterruptedException {
+								
 			int prob = 0;
 			for(Text value : values) {
 				prob++;
 			}
-			context.write(new Text(key + " " + key.toString().split("\\s+")[1]), new IntWritable(prob));
+			context.write(key, new IntWritable(prob));
 		}
 	}
 }
