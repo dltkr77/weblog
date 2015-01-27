@@ -71,7 +71,7 @@ public class AttackDetector extends Configured implements Tool {
 			int prob = 0;
 			
 			Matcher m = p.matcher(param);
-			if(m.find()) {
+			if(m.find() || param.contains("xp_cmdshell")) {
 				prob = 1;
 			}
 			context.write(new Text(ipTime + " " + url + " " + param + " " + stat), new IntWritable(prob));
