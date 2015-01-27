@@ -1,7 +1,6 @@
 package weblog;
 
 import java.io.IOException;
-import java.util.Iterator;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
@@ -61,8 +60,8 @@ public class MergeIP extends Configured implements Tool {
             String words[] = value.toString().split("\\s+");
             String ip = words[9];
             String time = words[1];
-            String url = words[5];
-            String param = words[6];
+            String url = words[5].toLowerCase();
+            String param = words[6].toLowerCase();
             String status = words[11];
 			Text output = new Text(url + " " + param + " " + status);
 
@@ -73,18 +72,17 @@ public class MergeIP extends Configured implements Tool {
 	public static class MergeReducer extends Reducer<Text, Text, Text, Text> {
 		/*
          * () == key
-		 * Input : (IP@Time), URL, Parameter, Status
+		 * Input : (IP@Time), [URL, Parameter, Status]
 		 * Output : (IP@Time), URL, Parameter, Status
 		 */
 		@Override
 		protected void reduce(Text key, Iterable<Text> values,
 				Reducer<Text, Text, Text, Text>.Context context)
 				throws IOException, InterruptedException {
-			Iterator<Text> it = values.iterator();
-			while(it.hasNext()) {
-				Text value = it.next();
+			
+			for(Text value : values) {
 				context.write(key, value);
-			}
+			}			
 		}
 	}
 }
