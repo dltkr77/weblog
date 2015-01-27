@@ -1,0 +1,7 @@
+.classpath
+.project
+bin
+weblog/target
+weblog/.classpath
+weblog/.project
+weblog/.settings
