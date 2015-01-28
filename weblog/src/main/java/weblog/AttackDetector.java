@@ -52,7 +52,7 @@ public class AttackDetector extends Configured implements Tool {
 	
 	public static class AttackDetectorMapper extends Mapper<LongWritable, Text, Text, IntWritable> {
 		private final static String regex = 
-				"(\\w+=\\w+)(\\;|%20|\'|\"|\\s+|[0-9]+)(and|or|exec|and|or|create|select)";
+				"(\\w+=\\w+)(;|%20|\'|\"|\\s+|[0-9]+)(and[\\s]+sleep|or\\s+[0-9]+=[0-9]+|exec|create|select|env|exit[(]|<script>)";
 		private Pattern p = Pattern.compile(regex);
 		/*
          * () == key
