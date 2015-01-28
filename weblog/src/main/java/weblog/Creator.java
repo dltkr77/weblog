@@ -194,7 +194,7 @@ public class Creator {
 			System.out.println("========== URL ==========");
 			Set<String> keys = sorUrlmap.keySet();
 			Iterator<String> it = keys.iterator();
-			for (int i = 0; i < 10; i++) {
+			while(it.hasNext()) {
 				String key = it.next();
 				System.out.println(key + " : " + sorUrlmap.get(key));
 			}
@@ -203,7 +203,7 @@ public class Creator {
 			System.out.println("========== IP ==========");
 			Set<String> ikeys = sorIpmap.keySet();
 			Iterator<String> iit = ikeys.iterator();
-			for (int i = 0; i < 10; i++) {
+			while(iit.hasNext()) {
 				String key = iit.next();
 				System.out.println(key + " : " + sorIpmap.get(key));
 			}
