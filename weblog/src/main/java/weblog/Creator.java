@@ -37,6 +37,7 @@ public class Creator {
 		
 		Make m = new Make();
 		m.makeIndex();
+		m.makeBar();
 	}
 
 	public static class Make {
