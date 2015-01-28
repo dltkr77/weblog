@@ -54,7 +54,7 @@ public class Creator {
 			
 			String s = null;
 			while((s = indexhead.readLine()) != null) {
-				index.write(s);
+				index.write(s+"\n");
 			}
 			
 			int count = 0;
@@ -63,13 +63,20 @@ public class Creator {
 			while(it.hasNext()) {
 				String key = it.next();
 				int n = sorUrlmap.get(key);
-				index.write("{text: \"" + key + ", count: \"" + n + "\"},");
+				int org = n;
+                if(n > 1000) {
+                    while((n /= 10) > 1000);
+                } else if(n < 10) {
+                    n *= 10;
+                }
+                
+				index.write("        {text: \"" + key + "(" + org + ")\", count: \"" + n + "\"},\n");
 				if(count == 9) break;
 				count++;
 			}
 			
 			while((s = indextail.readLine()) != null) {
-				index.write(s);
+				index.write(s+"\n");
 			}
 			indexhead.close();
 			indextail.close();
