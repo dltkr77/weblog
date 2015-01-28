@@ -35,6 +35,9 @@ public class Creator {
 		merge.countState();
 		merge.sortMap();
 		merge.printMap();
+		
+		Make m = new Make();
+		m.makeIndex();
 	}
 
 	public static class Make {
@@ -71,6 +74,19 @@ public class Creator {
 		public void makeIndex() throws Exception {
 			String s = null;
 			while((s = indexhead.readLine()) != null) {
+				index.write(s);
+			}
+			
+			int count = 0;
+			Set<String> keys = sorUrlmap.keySet();
+			Iterator<String> it = keys.iterator();
+			while(it.hasNext()) {
+				String key = it.next();
+				int n = sorUrlmap.get(key);
+				index.write("{text: \"" + key + ", count: \"" + n + "\"},");
+			}
+			
+			while((s = indextail.readLine()) != null) {
 				index.write(s);
 			}
 		}
