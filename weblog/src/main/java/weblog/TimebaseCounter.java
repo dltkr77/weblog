@@ -51,7 +51,7 @@ public class TimebaseCounter extends Configured implements Tool {
 		/*
          * () == key
 		 * Input : (offset), IP, Date, Time, URL, Parameter, Status
-		 * Output : (IP, Date, Time, URL), 1
+		 * Output : (IP, Date, Time), 1
 		 */
 		@Override
 		protected void map(LongWritable key, Text value,
@@ -61,17 +61,16 @@ public class TimebaseCounter extends Configured implements Tool {
 			String ip = words[0];
 			String date = words[1];
 			String time = words[2];
-			String url = words[3];
 			
-			context.write(new Text(ip + " " + date + " " + time + " " + url), new IntWritable(1));
+			context.write(new Text(ip + " " + date + " " + time), new IntWritable(1));
 		}
 	}
 	
 	public static class TimebaseReducer extends Reducer<Text, IntWritable, Text, IntWritable> {
 		/*
          * () == key
-		 * Input : (IP, Date, Time, URL), 1[]
-		 * Output : (IP, Date, Time, URL), count
+		 * Input : (IP, Date, Time), 1[]
+		 * Output : (IP, Date, Time), count
 		 */
 		@Override
 		protected void reduce(Text key, Iterable<IntWritable> values,
