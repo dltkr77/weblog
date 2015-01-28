@@ -106,25 +106,25 @@ public class Creator {
 				int inum = 0;
 				try { inum = ip_decmap.get(ip); } 
 				catch (java.lang.NullPointerException e) { inum = 0; }
-				if (inum == 0) { 
-					ip_decmap.put(ip, val);
-					ipmap.put(ip, val);
-				} else { 
-					ip_decmap.put(ip, inum + val);
-					ipmap.put(ip,  inum + val);
-				}
+				if (inum == 0) { ip_decmap.put(ip, val); } 
+				else { ip_decmap.put(ip, inum + val); }
+				
+				try { inum = ipmap.get(ip); } 
+				catch (java.lang.NullPointerException e) { inum = 0; }
+				if (inum == 0) { ipmap.put(ip, val); } 
+				else { ipmap.put(ip, inum + val); }
 
 				/* urlmap */
 				int unum = 0;
 				try { unum = url_decmap.get(url); } 
 				catch (java.lang.NullPointerException e) { unum = 0; }
-				if (unum == 0) { 
-					url_decmap.put(url, val);
-					urlmap.put(url, val);
-				} else { 
-					url_decmap.put(url, unum + val);
-					urlmap.put(url,  unum + val);
-				}
+				if (unum == 0) { url_decmap.put(url, val); } 
+				else { url_decmap.put(url, unum + val); }
+				
+				try { unum = urlmap.get(url); } 
+				catch (java.lang.NullPointerException e) { unum = 0; }
+				if (unum == 0) { urlmap.put(url, val); } 
+				else { urlmap.put(url, unum + val); }
 			}
 		}
 
@@ -140,25 +140,20 @@ public class Creator {
 				int inum = 0;
 				try { inum = ip_statmap.get(ip); } 
 				catch (java.lang.NullPointerException e) { inum = 0; }
-				if (inum == 0) { 
-					ip_statmap.put(ip, val);
-					ipmap.put(ip,  val);
-				} else { 
-					ip_statmap.put(ip, inum + val);
-					ipmap.put(ip,  inum + val);
-				}
+				if (inum == 0) { ip_statmap.put(ip, val); } 
+				else { ip_statmap.put(ip, inum + val); }
+				
+				try { inum = ipmap.get(ip); } 
+				catch (java.lang.NullPointerException e) { inum = 0; }
+				if (inum == 0) { ipmap.put(ip, val); } 
+				else { ipmap.put(ip, inum + val); }
 
 				/* urlmap */
 				int unum = 0;
 				try { unum = url_statmap.get(url); } 
 				catch (java.lang.NullPointerException e) { unum = 0; }
-				if (unum == 0) { 
-					url_statmap.put(url, val);
-					urlmap.put(url, val);
-				} else { 
-					url_statmap.put(url, unum + val);
-					urlmap.put(url, unum + val);
-				}
+				if (unum == 0) { url_statmap.put(url, val); } 
+				else { url_statmap.put(url, unum + val); }
 			}
 		}
 
@@ -174,14 +169,8 @@ public class Creator {
 				if (val > 100) {
 					try { inum = ip_cntmap.get(ip); } 
 					catch (java.lang.NullPointerException e) { inum = 0; }
-					if (inum == 0) { 
-						ip_cntmap.put(ip, 1);
-						ipmap.put(ip, 1);
-					} 
-					else { 
-						ip_cntmap.put(ip, inum + 1);
-						ipmap.put(ip, inum + 1);
-					}
+					if (inum == 0) { ip_cntmap.put(ip, 1); } 
+					else { ip_cntmap.put(ip, inum + 1); }
 				}
 			}
 		}
