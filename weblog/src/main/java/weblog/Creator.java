@@ -2,7 +2,6 @@ package weblog;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.Comparator;
@@ -41,13 +40,6 @@ public class Creator {
 	}
 
 	public static class Make {
-		private FileReader indexfrh;
-		private FileReader indexfrt;
-		private FileReader barfr;
-		
-		private FileWriter indexfw;
-		private FileWriter barfw;
-		
 		private BufferedReader indexhead;
 		private BufferedReader indextail;
 		private BufferedReader bartem;
@@ -55,23 +47,11 @@ public class Creator {
 		private BufferedWriter index;
 		private BufferedWriter bar;
 		
-		Make() throws Exception {
-			indexfrh = new FileReader(new File("/var/www/html/index.head"));
-			indexfrt = new FileReader(new File("/var/www/html/index.tail"));
-			barfr = new FileReader(new File("/var/www/html/bar.tem"));
-			
-			indexfw = new FileWriter(new File("/var/www/html/index.js"));
-			barfw = new FileWriter(new File("/var/www/html/bar.html"));
-			
-			indexhead = new BufferedReader(indexfrh);
-			indextail = new BufferedReader(indexfrt);
-			bartem = new BufferedReader(barfr);
-			
-			index = new BufferedWriter(indexfw);
-			bar = new BufferedWriter(barfw);
-		}
-		
 		public void makeIndex() throws Exception {
+			indexhead = new BufferedReader(new FileReader("/var/www/html/index.head"));
+			indextail = new BufferedReader(new FileReader("/var/www/html/index.tail"));
+			index = new BufferedWriter(new FileWriter("/var/www/html/index.js"));
+			
 			String s = null;
 			while((s = indexhead.readLine()) != null) {
 				index.write(s);
@@ -84,33 +64,27 @@ public class Creator {
 				String key = it.next();
 				int n = sorUrlmap.get(key);
 				index.write("{text: \"" + key + ", count: \"" + n + "\"},");
+				if(count == 9) break;
+				count++;
 			}
 			
 			while((s = indextail.readLine()) != null) {
 				index.write(s);
 			}
+			indexhead.close();
+			indextail.close();
+			index.close();
 		}
 	}
 	
 	public static class TotalMerge {
-		private FileReader counterfr;
-		private FileReader detectorfr;
-		private FileReader statefr;
 		private BufferedReader counter;
 		private BufferedReader detector;
 		private BufferedReader state;
 
-		TotalMerge() throws Exception {
-			counterfr = new FileReader(new File("counter.txt"));
-			detectorfr = new FileReader(new File("detector.txt"));
-			statefr = new FileReader(new File("state.txt"));
-
-			counter = new BufferedReader(counterfr);
-			detector = new BufferedReader(detectorfr);
-			state = new BufferedReader(statefr);
-		}
-
 		public void countDetector() throws Exception {
+			detector = new BufferedReader(new FileReader("detector.txt"));
+			
 			String s = null;
 			while ((s = detector.readLine()) != null) {
 				String words[] = s.split("\\s+");
@@ -141,10 +115,14 @@ public class Creator {
 				catch (java.lang.NullPointerException e) { unum = 0; }
 				if (unum == 0) { urlmap.put(url, val); } 
 				else { urlmap.put(url, unum + val); }
-			}
+			}			
+			
+			detector.close();
 		}
 
 		public void countState() throws Exception {
+			state = new BufferedReader(new FileReader("state.txt"));
+			
 			String s = null;
 			while ((s = state.readLine()) != null) {
 				String words[] = s.split("\\s+");
@@ -176,9 +154,12 @@ public class Creator {
 				if (unum == 0) { urlmap.put(url, val); } 
 				else { urlmap.put(url, unum + val); }
 			}
+			state.close();
 		}
 
 		public void countCounter() throws Exception {
+			counter = new BufferedReader(new FileReader("counter.txt"));
+			
 			String s = null;
 			while ((s = counter.readLine()) != null) {
 				String words[] = s.split("\\s+");
@@ -199,6 +180,7 @@ public class Creator {
 					else { ipmap.put(ip, inum + 1); }
 				}
 			}
+			counter.close();
 		}
 
 		public void sortMap() {
