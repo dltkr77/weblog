@@ -154,6 +154,11 @@ public class Creator {
 				catch (java.lang.NullPointerException e) { unum = 0; }
 				if (unum == 0) { url_statmap.put(url, val); } 
 				else { url_statmap.put(url, unum + val); }
+				
+				try { unum = urlmap.get(url); } 
+				catch (java.lang.NullPointerException e) { unum = 0; }
+				if (unum == 0) { urlmap.put(url, val); } 
+				else { urlmap.put(url, unum + val); }
 			}
 		}
 
@@ -171,6 +176,11 @@ public class Creator {
 					catch (java.lang.NullPointerException e) { inum = 0; }
 					if (inum == 0) { ip_cntmap.put(ip, 1); } 
 					else { ip_cntmap.put(ip, inum + 1); }
+					
+					try { inum = ipmap.get(ip); } 
+					catch (java.lang.NullPointerException e) { inum = 0; }
+					if (inum == 0) { ipmap.put(ip, 1); } 
+					else { ipmap.put(ip, inum + 1); }
 				}
 			}
 		}
