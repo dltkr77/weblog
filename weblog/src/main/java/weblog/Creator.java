@@ -98,9 +98,16 @@ public class Creator {
 			int count = 0;
 			while(it.hasNext()) {
 				String key = it.next();
-				int sql = ip_decmap.get(key);
-				int timebase = ip_cntmap.get(key);
-				int state = ip_statmap.get(key);
+				int sql = 0, timebase = 0, state = 0;
+				if(ip_decmap.containsKey(key)) {
+					sql = ip_decmap.get(key);
+				}
+				if(ip_cntmap.containsKey(key)) {
+					timebase = ip_cntmap.get(key);
+				}
+				if(ip_statmap.containsKey(key)) {
+					state = ip_statmap.get(key);
+				}
 				
 				bar.write("{State:'" + key + "',freq:{sql:" + sql + ", timebase:" + timebase +
 						", state:" + state + "}}\n");
@@ -128,7 +135,7 @@ public class Creator {
 				String words[] = s.split("\\s+");
 				String ip = words[0];
 				String url = words[3];
-				int val = Integer.parseInt(words[4]) * 3;
+				int val = Integer.parseInt(words[4]);
 
 				/* ipmap */
 				int inum = 0;
@@ -166,7 +173,7 @@ public class Creator {
 				String words[] = s.split("\\s+");
 				String ip = words[0];
 				String url = words[1];
-				int val = Integer.parseInt(words[2]) * 2;
+				int val = Integer.parseInt(words[2]);
 
 				/* ipmap */
 				int inum = 0;
