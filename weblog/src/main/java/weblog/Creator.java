@@ -82,6 +82,36 @@ public class Creator {
 			indextail.close();
 			index.close();
 		}
+		
+		public void makeBar() throws Exception {
+			bartem = new BufferedReader(new FileReader("/var/www/html/bar.tem"));
+			bar = new BufferedWriter(new FileWriter("/var/www/html/bar.html"));
+			
+			String s = null;
+			while((s = bartem.readLine()) != null) {
+				bar.write(s + "\n");
+			}
+			
+			Set<String> set = sorIpmap.keySet();
+			Iterator<String> it = set.iterator();
+			int count = 0;
+			while(it.hasNext()) {
+				String key = it.next();
+				int sql = ip_decmap.get(key);
+				int timebase = ip_cntmap.get(key);
+				int state = ip_statmap.get(key);
+				
+				bar.write("{State:'" + key + "',freq:{sql:" + sql + ", timebase:" + timebase +
+						", state:" + state + "}}\n");
+				if(count == 9) break;
+				count++;
+				bar.write(",");
+			}
+			
+			bar.write("];\n\ndashboard('#dashboard',freqData);\n</script>");
+			bartem.close();
+			bar.close();
+		}
 	}
 	
 	public static class TotalMerge {
