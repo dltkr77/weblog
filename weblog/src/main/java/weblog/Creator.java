@@ -192,20 +192,26 @@ public class Creator {
 
 		public void printMap() {
 			System.out.println("========== URL ==========");
+			int count = 0;
 			Set<String> keys = sorUrlmap.keySet();
 			Iterator<String> it = keys.iterator();
 			while(it.hasNext()) {
 				String key = it.next();
 				System.out.println(key + " : " + sorUrlmap.get(key));
+				if(count == 9) break;
+				count++;
 			}
 			System.out.println("=========================\n");
 
 			System.out.println("========== IP ==========");
+			count = 0;
 			Set<String> ikeys = sorIpmap.keySet();
 			Iterator<String> iit = ikeys.iterator();
 			while(iit.hasNext()) {
 				String key = iit.next();
 				System.out.println(key + " : " + sorIpmap.get(key));
+				if(count == 9) break;
+				count++;
 			}
 			System.out.println("========================");
 		}
