@@ -1,8 +1,10 @@
 package weblog;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -13,6 +15,12 @@ import java.util.TreeMap;
 public class Creator {
 	private static Map<String, Integer> urlmap = new HashMap<String, Integer>();
 	private static Map<String, Integer> ipmap = new HashMap<String, Integer>();
+	
+	private static Map<String, Integer> ip_decmap = new HashMap<String, Integer>();
+	private static Map<String, Integer> url_decmap = new HashMap<String, Integer>();
+	private static Map<String, Integer> ip_statmap = new HashMap<String, Integer>();
+	private static Map<String, Integer> url_statmap = new HashMap<String, Integer>();
+	private static Map<String, Integer> ip_cntmap = new HashMap<String, Integer>();
 
 	private static ValueComparator ubvc = new ValueComparator(urlmap);
 	private static ValueComparator ibvc = new ValueComparator(ipmap);
@@ -29,6 +37,45 @@ public class Creator {
 		merge.printMap();
 	}
 
+	public static class Make {
+		private FileReader indexfrh;
+		private FileReader indexfrt;
+		private FileReader barfr;
+		
+		private FileWriter indexfw;
+		private FileWriter barfw;
+		
+		private BufferedReader indexhead;
+		private BufferedReader indextail;
+		private BufferedReader bartem;
+		
+		private BufferedWriter index;
+		private BufferedWriter bar;
+		
+		Make() throws Exception {
+			indexfrh = new FileReader(new File("/var/www/html/index.head"));
+			indexfrt = new FileReader(new File("/var/www/html/index.tail"));
+			barfr = new FileReader(new File("/var/www/html/bar.tem"));
+			
+			indexfw = new FileWriter(new File("/var/www/html/index.js"));
+			barfw = new FileWriter(new File("/var/www/html/bar.html"));
+			
+			indexhead = new BufferedReader(indexfrh);
+			indextail = new BufferedReader(indexfrt);
+			bartem = new BufferedReader(barfr);
+			
+			index = new BufferedWriter(indexfw);
+			bar = new BufferedWriter(barfw);
+		}
+		
+		public void makeIndex() throws Exception {
+			String s = null;
+			while((s = indexhead.readLine()) != null) {
+				index.write(s);
+			}
+		}
+	}
+	
 	public static class TotalMerge {
 		private FileReader counterfr;
 		private FileReader detectorfr;
@@ -57,17 +104,17 @@ public class Creator {
 
 				/* ipmap */
 				int inum = 0;
-				try { inum = ipmap.get(ip); } 
+				try { inum = ip_decmap.get(ip); } 
 				catch (java.lang.NullPointerException e) { inum = 0; }
-				if (inum == 0) { ipmap.put(ip, val); } 
-				else { ipmap.put(ip, inum + val); }
+				if (inum == 0) { ip_decmap.put(ip, val); } 
+				else { ip_decmap.put(ip, inum + val); }
 
 				/* urlmap */
 				int unum = 0;
-				try { unum = urlmap.get(url); } 
+				try { unum = url_decmap.get(url); } 
 				catch (java.lang.NullPointerException e) { unum = 0; }
-				if (unum == 0) { urlmap.put(url, val); } 
-				else { urlmap.put(url, unum + val); }
+				if (unum == 0) { url_decmap.put(url, val); } 
+				else { url_decmap.put(url, unum + val); }
 			}
 		}
 
@@ -81,17 +128,17 @@ public class Creator {
 
 				/* ipmap */
 				int inum = 0;
-				try { inum = ipmap.get(ip); } 
+				try { inum = ip_statmap.get(ip); } 
 				catch (java.lang.NullPointerException e) { inum = 0; }
-				if (inum == 0) { ipmap.put(ip, val); } 
-				else { ipmap.put(ip, inum + val); }
+				if (inum == 0) { ip_statmap.put(ip, val); } 
+				else { ip_statmap.put(ip, inum + val); }
 
 				/* urlmap */
 				int unum = 0;
-				try { unum = urlmap.get(url); } 
+				try { unum = url_statmap.get(url); } 
 				catch (java.lang.NullPointerException e) { unum = 0; }
-				if (unum == 0) { urlmap.put(url, val); } 
-				else { urlmap.put(url, unum + val); }
+				if (unum == 0) { url_statmap.put(url, val); } 
+				else { url_statmap.put(url, unum + val); }
 			}
 		}
 
@@ -105,17 +152,21 @@ public class Creator {
 				/* 초당 요청 횟수가 100회 이상인 경우 */
 				int inum = 0;
 				if (val > 100) {
-					try { inum = ipmap.get(ip); } 
+					try { inum = ip_cntmap.get(ip); } 
 					catch (java.lang.NullPointerException e) { inum = 0; }
-					if (inum == 0) { ipmap.put(ip, 1); } 
-					else { ipmap.put(ip, inum + 1); }
+					if (inum == 0) { ip_cntmap.put(ip, 1); } 
+					else { ip_cntmap.put(ip, inum + 1); }
 				}
 			}
 		}
 
 		public void sortMap() {
-			sorUrlmap.putAll(urlmap);
-			sorIpmap.putAll(ipmap);
+			sorUrlmap.putAll(url_decmap);
+			sorUrlmap.putAll(url_statmap);
+			
+			sorIpmap.putAll(ip_decmap);
+			sorIpmap.putAll(ip_statmap);
+			sorIpmap.putAll(ip_cntmap);
 		}
 
 		public void printMap() {
