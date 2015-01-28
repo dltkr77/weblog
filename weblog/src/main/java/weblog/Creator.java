@@ -197,7 +197,7 @@ public class Creator {
 			Iterator<String> it = keys.iterator();
 			for (int i = 0; i < 10; i++) {
 				String key = it.next();
-				System.out.println(key + " : " + urlmap.get(key));
+				System.out.println(key + " : " + sorUrlmap.get(key));
 			}
 			System.out.println("=========================\n");
 
@@ -206,7 +206,7 @@ public class Creator {
 			Iterator<String> iit = ikeys.iterator();
 			for (int i = 0; i < 10; i++) {
 				String key = iit.next();
-				System.out.println(key + " : " + ipmap.get(key));
+				System.out.println(key + " : " + sorIpmap.get(key));
 			}
 			System.out.println("========================");
 		}
